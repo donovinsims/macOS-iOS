@@ -42,9 +42,9 @@ export function Hero() {
           initial={mounted ? { opacity: 0, y: 20 } : false}
           animate={mounted ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white !whitespace-pre-line">The Best  
 
-          Curated <span className="text-zinc-400 dark:text-zinc-600 !whitespace-pre-line">Free Apps</span> for macOS & iOS
+          <span className="text-zinc-400 dark:text-zinc-600 !whitespace-pre-line">Free Apps</span>
         </motion.h1>
 
         <motion.p
