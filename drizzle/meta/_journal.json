@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1763516897222,
+      "tag": "0000_lowly_nick_fury",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1763516900929,
+      "tag": "0001_bouncy_menace",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1763519305072,
+      "tag": "0002_foamy_living_mummy",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1763607355787,
+      "tag": "0003_wonderful_kid_colt",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1763607628261,
+      "tag": "0004_complete_bloodaxe",
+      "breakpoints": true
+    }
+  ]
+}
