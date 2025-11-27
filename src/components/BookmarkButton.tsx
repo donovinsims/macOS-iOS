@@ -117,7 +117,7 @@ export function BookmarkButton({
       variant="ghost"
       size="icon"
       className={cn(
-        "rounded-full transition-all duration-300 hover:bg-transparent dark:hover:bg-transparent",
+        "rounded-full transition-all duration-300 hover:bg-transparent hover:scale-110 active:scale-95 dark:hover:bg-transparent",
         className
       )}
       aria-pressed={isBookmarked}
