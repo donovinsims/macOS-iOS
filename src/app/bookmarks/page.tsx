@@ -17,7 +17,7 @@ interface App {
   downloadUrl: string;
   platform: string;
   category: string;
-  screenshots: string[] | null;
+  screenshots: { url: string; caption?: string | null }[];
   rating: number;
   reviewsCount: number;
   createdAt: string;

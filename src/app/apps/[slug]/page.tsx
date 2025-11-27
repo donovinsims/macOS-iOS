@@ -140,9 +140,9 @@ export default async function AppPage({ params }: AppPageProps) {
                 Preview
               </h2>
               {app.screenshots && (
-                <ScreenshotGallery 
-                  screenshots={Array.isArray(app.screenshots) ? app.screenshots : JSON.parse(app.screenshots as unknown as string)} 
-                  appName={app.name} 
+                <ScreenshotGallery
+                  screenshots={app.screenshots}
+                  appName={app.name}
                 />
               )}
             </section>

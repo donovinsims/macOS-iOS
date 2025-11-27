@@ -1,4 +1,9 @@
-import { sqliteTable, integer, text, real } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, integer, text, real, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
+
+export type Screenshot = {
+  url: string;
+  caption?: string | null;
+};
 
 export const apps = sqliteTable('apps', {
   id: integer('id').primaryKey({ autoIncrement: true }),
@@ -11,18 +16,30 @@ export const apps = sqliteTable('apps', {
   downloadUrl: text('download_url').notNull(),
   platform: text('platform').notNull(),
   category: text('category').notNull(),
-  screenshots: text('screenshots', { mode: 'json' }),
+  screenshots: text('screenshots', { mode: 'json' })
+    .$type<Screenshot[]>()
+    .$defaultFn(() => [] as Screenshot[])
+    .notNull(),
   rating: real('rating').notNull(),
   reviewsCount: integer('reviews_count').notNull().default(0),
-  createdAt: text('created_at').notNull(),
-});
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .$defaultFn(() => new Date())
+    .notNull(),
+}, (table) => ({
+  categoryIdx: index('apps_category_idx').on(table.category),
+  platformIdx: index('apps_platform_idx').on(table.platform),
+}));
 
 export const bookmarks = sqliteTable('bookmarks', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
   appId: integer('app_id').notNull().references(() => apps.id, { onDelete: 'cascade' }),
-  createdAt: text('created_at').notNull(),
-});
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .$defaultFn(() => new Date())
+    .notNull(),
+}, (table) => ({
+  userAppUnique: uniqueIndex('bookmarks_user_app_unique').on(table.userId, table.appId),
+}));
 
 // Auth tables for better-auth
 export const user = sqliteTable("user", {

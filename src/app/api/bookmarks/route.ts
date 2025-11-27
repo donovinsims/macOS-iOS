@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       .values({
         userId,
         appId: appIdInt,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       })
       .returning();
 

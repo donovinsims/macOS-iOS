@@ -6,13 +6,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
+interface Screenshot {
+  url: string;
+  caption?: string | null;
+}
+
 interface ScreenshotGalleryProps {
-  screenshots: string[];
+  screenshots: Screenshot[];
   appName: string;
 }
 
 export function ScreenshotGallery({ screenshots, appName }: ScreenshotGalleryProps) {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedImage, setSelectedImage] = useState<Screenshot | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const openLightbox = (index: number) => {
@@ -53,7 +58,7 @@ export function ScreenshotGallery({ screenshots, appName }: ScreenshotGalleryPro
             onClick={() => openLightbox(index)}
           >
             <Image
-              src={screenshot}
+              src={screenshot.url}
               alt={`${appName} screenshot ${index + 1}`}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -95,8 +100,8 @@ export function ScreenshotGallery({ screenshots, appName }: ScreenshotGalleryPro
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={selectedImage}
-                alt="Screenshot"
+                src={selectedImage.url}
+                alt={selectedImage.caption || `${appName} screenshot ${currentIndex + 1}`}
                 fill
                 className="object-contain"
                 quality={100}

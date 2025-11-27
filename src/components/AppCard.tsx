@@ -19,7 +19,7 @@ export interface App {
   category: string;
   rating: number;
   reviewsCount: number;
-  screenshots?: string[];
+  screenshots?: { url: string; caption?: string | null }[];
 }
 
 interface AppCardProps {
@@ -29,7 +29,7 @@ interface AppCardProps {
 
 export function AppCard({ app, index }: AppCardProps) {
   // Use first screenshot as hero image, fallback to iconUrl
-  const heroImage = app.screenshots?.[0] || app.iconUrl;
+  const heroImage = app.screenshots?.[0]?.url || app.iconUrl;
 
   return (
     <motion.div
