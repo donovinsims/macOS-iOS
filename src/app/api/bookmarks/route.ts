@@ -114,6 +114,15 @@ export async function POST(request: NextRequest) {
       })
       .returning();
 
+    const createdBookmark = newBookmark[0];
+
+    if (!createdBookmark) {
+      return NextResponse.json(
+        { error: 'Failed to create bookmark', code: 'BOOKMARK_CREATE_FAILED' },
+        { status: 500 }
+      );
+    }
+
     const bookmarkWithApp = await db
       .select({
         id: bookmarks.id,
@@ -139,7 +148,7 @@ export async function POST(request: NextRequest) {
       })
       .from(bookmarks)
       .leftJoin(apps, eq(bookmarks.appId, apps.id))
-      .where(eq(bookmarks.id, newBookmark[0].id))
+      .where(eq(bookmarks.id, createdBookmark.id))
       .limit(1);
 
     return NextResponse.json(bookmarkWithApp[0], { status: 201 });

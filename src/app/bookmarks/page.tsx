@@ -3,32 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
-import { AppCard } from "@/components/AppCard";
+import { AppCard, type App as AppCardApp } from "@/components/AppCard";
 import { Bookmark, Loader2 } from "lucide-react";
-
-interface App {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  shortDescription: string;
-  developer: string;
-  iconUrl: string;
-  downloadUrl: string;
-  platform: string;
-  category: string;
-  screenshots: string[] | null;
-  rating: number;
-  reviewsCount: number;
-  createdAt: string;
-}
 
 interface BookmarkWithApp {
   id: number;
   userId: string;
   appId: number;
   createdAt: string;
-  app: App;
+  app: AppCardApp;
 }
 
 export default function BookmarksPage() {
@@ -61,7 +44,16 @@ export default function BookmarksPage() {
 
       if (res.ok) {
         const data = await res.json();
-        setBookmarks(data);
+        const normalized: BookmarkWithApp[] = (data as BookmarkWithApp[]).map(
+          (bookmark) => ({
+            ...bookmark,
+            app: {
+              ...bookmark.app,
+              screenshots: bookmark.app.screenshots ?? undefined,
+            },
+          })
+        );
+        setBookmarks(normalized);
       }
     } catch (error) {
       console.error("Failed to fetch bookmarks:", error);
@@ -131,9 +123,10 @@ export default function BookmarksPage() {
               {bookmarks.length} {bookmarks.length === 1 ? "app" : "apps"} saved
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {bookmarks.map((bookmark) => (
+              {bookmarks.map((bookmark, index) => (
                 <AppCard
                   key={bookmark.app.id}
+                  index={index}
                   app={bookmark.app}
                   onBookmarkChange={() => handleBookmarkRemoved(bookmark.app.id)}
                 />

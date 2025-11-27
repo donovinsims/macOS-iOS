@@ -16,7 +16,9 @@ export function ScreenshotGallery({ screenshots, appName }: ScreenshotGalleryPro
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const openLightbox = (index: number) => {
-    setSelectedImage(screenshots[index]);
+    const image = screenshots[index];
+    if (!image) return;
+    setSelectedImage(image);
     setCurrentIndex(index);
     document.body.style.overflow = "hidden";
   };
@@ -28,16 +30,20 @@ export function ScreenshotGallery({ screenshots, appName }: ScreenshotGalleryPro
 
   const nextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!screenshots.length) return;
     const nextIndex = (currentIndex + 1) % screenshots.length;
     setCurrentIndex(nextIndex);
-    setSelectedImage(screenshots[nextIndex]);
+    const nextImage = screenshots[nextIndex];
+    setSelectedImage(nextImage ?? null);
   };
 
   const prevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!screenshots.length) return;
     const prevIndex = (currentIndex - 1 + screenshots.length) % screenshots.length;
     setCurrentIndex(prevIndex);
-    setSelectedImage(screenshots[prevIndex]);
+    const prevImage = screenshots[prevIndex];
+    setSelectedImage(prevImage ?? null);
   };
 
   return (
