@@ -19,7 +19,6 @@ export function Hero() {
   }, []);
 
   useEffect(() => {
-    // Only push if the query has changed from what's in the URL
     if (debouncedQuery !== (searchParams.get("search") || "")) {
       const params = new URLSearchParams(searchParams);
       if (debouncedQuery) {
@@ -31,6 +30,10 @@ export function Hero() {
     }
   }, [debouncedQuery, router, searchParams]);
 
+  const MotionH1 = mounted ? motion.h1 : "h1";
+  const MotionP = mounted ? motion.p : "p";
+  const MotionDiv = mounted ? motion.div : "div";
+
   return (
     <section className="relative pt-32 pb-16 px-4 overflow-hidden">
       <div className="absolute inset-0 -z-10 pointer-events-none">
@@ -38,30 +41,33 @@ export function Hero() {
       </div>
 
       <div className="container mx-auto max-w-4xl text-center space-y-8">
-        <motion.h1
-          initial={mounted ? { opacity: 0, y: 20 } : false}
-          animate={mounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5 }}
-          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white !whitespace-pre-line">The Best  
+        <MotionH1
+          {...(mounted && {
+            initial: { opacity: 0, y: 20 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.5 }
+          })}
+          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white">
+          The Best <span className="text-zinc-400 dark:text-zinc-600">Free Apps</span>
+        </MotionH1>
 
-          <span className="text-zinc-400 dark:text-zinc-600 !whitespace-pre-line">Free Apps</span>
-        </motion.h1>
-
-        <motion.p
-          initial={mounted ? { opacity: 0, y: 20 } : false}
-          animate={mounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.1 }}
+        <MotionP
+          {...(mounted && {
+            initial: { opacity: 0, y: 20 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.5, delay: 0.1 }
+          })}
           className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-
           Discover the finest collection of free, high-quality applications designed to elevate your productivity and creativity.
-        </motion.p>
+        </MotionP>
 
-        <motion.div
-          initial={mounted ? { opacity: 0, y: 20 } : false}
-          animate={mounted ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.5, delay: 0.2 }}
+        <MotionDiv
+          {...(mounted && {
+            initial: { opacity: 0, y: 20 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.5, delay: 0.2 }
+          })}
           className="max-w-md mx-auto relative">
-
           <div className="relative group">
             <div className="absolute -inset-1 bg-gradient-to-r from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-700 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
             <div className="relative">
@@ -72,11 +78,10 @@ export function Hero() {
                 className="w-full pl-12 h-14 rounded-full bg-white dark:bg-zinc-950 border-zinc-200 dark:border-zinc-800 focus-visible:ring-2 focus-visible:ring-zinc-400 dark:focus-visible:ring-zinc-600 text-base shadow-sm"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)} />
-
             </div>
           </div>
-        </motion.div>
+        </MotionDiv>
       </div>
-    </section>);
-
+    </section>
+  );
 }
