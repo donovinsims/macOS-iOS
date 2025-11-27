@@ -36,25 +36,25 @@ export function AppCard({ app, index }: AppCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="group relative">
-
+      className="group relative"
+    >
       <Link href={`/apps/${app.slug}`} className="block">
         <div className="relative">
           {/* Hero Image - Only this has border */}
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[12px] border border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[14px] border border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
             <Image
               src={heroImage}
               alt={app.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
-
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            />
             
             {/* Hover Overlay with Product Information */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center rounded-[12px]">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center">
               {/* Category Badge */}
               <div className="mb-4">
-                <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-[22px] text-sm font-medium text-white">
+                <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
                   {app.category}
                 </span>
               </div>
@@ -91,6 +91,6 @@ export function AppCard({ app, index }: AppCardProps) {
           </div>
         </div>
       </Link>
-    </motion.div>);
-
+    </motion.div>
+  );
 }
