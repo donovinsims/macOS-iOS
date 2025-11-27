@@ -20,13 +20,9 @@
 # production
 /build
 
-# environment
-.env
-
 # misc
 .DS_Store
 *.pem
-bun.lock
 
 # debug
 npm-debug.log*
