@@ -47,8 +47,8 @@ export function Hero() {
             animate: { opacity: 1, y: 0 },
             transition: { duration: 0.5 }
           }}
-          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white">
-          The Best <span className="text-zinc-400 dark:text-zinc-600 !whitespace-pre-line">Apps</span>
+          className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 dark:text-white !whitespace-pre-line">Discover The Best 
+          <span className="text-zinc-400 dark:text-zinc-600 !whitespace-pre-line">Apps</span>
         </MotionH1>
 
         <MotionP
