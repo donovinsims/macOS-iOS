@@ -6,7 +6,7 @@ export const authClient = createAuthClient({
    baseURL: typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_SITE_URL,
   fetchOptions: {
       headers: {
-        Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem("bearer_token") : ""}`,
+        Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem("bearer_token") ?? "" : ""}`,
       },
       onSuccess: (ctx) => {
           const authToken = ctx.response.headers.get("set-auth-token")
@@ -14,7 +14,9 @@ export const authClient = createAuthClient({
           if(authToken){
             // Split token at "." and take only the first part
             const tokenPart = authToken.includes('.') ? authToken.split('.')[0] : authToken;
-            localStorage.setItem("bearer_token", tokenPart);
+            if (tokenPart) {
+              localStorage.setItem("bearer_token", tokenPart);
+            }
           }
       }
   }
@@ -26,14 +28,9 @@ export function useSession(): SessionData {
    const [session, setSession] = useState<any>(null);
    const [isPending, setIsPending] = useState(true);
    const [error, setError] = useState<any>(null);
+   const [isRefetching, setIsRefetching] = useState(false);
 
-   const refetch = () => {
-      setIsPending(true);
-      setError(null);
-      fetchSession();
-   };
-
-   const fetchSession = async () => {
+   const fetchSession = async (): Promise<void> => {
       try {
          const res = await authClient.getSession({
             fetchOptions: {
@@ -53,9 +50,17 @@ export function useSession(): SessionData {
       }
    };
 
+   const refetch = async () => {
+      setIsPending(true);
+      setIsRefetching(true);
+      setError(null);
+      await fetchSession();
+      setIsRefetching(false);
+   };
+
    useEffect(() => {
       fetchSession();
    }, []);
 
-   return { data: session, isPending, error, refetch };
+   return { data: session, isPending, error, refetch, isRefetching };
 }

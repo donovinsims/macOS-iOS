@@ -11,12 +11,14 @@ interface BookmarkButtonProps {
   appId: number;
   initialIsBookmarked?: boolean;
   className?: string;
+  onToggle?: (isBookmarked: boolean) => void;
 }
 
 export function BookmarkButton({
   appId,
   initialIsBookmarked = false,
   className,
+  onToggle,
 }: BookmarkButtonProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -28,7 +30,10 @@ export function BookmarkButton({
   const [loading, setLoading] = useState(false);
 
   const token = useMemo(
-    () => (typeof window !== "undefined" ? localStorage.getItem("bearer_token") : ""),
+    () =>
+      typeof window !== "undefined"
+        ? localStorage.getItem("bearer_token") ?? ""
+        : "",
     []
   );
 
@@ -82,7 +87,9 @@ export function BookmarkButton({
     }
 
     try {
-      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+      const authHeader: HeadersInit = token
+        ? { Authorization: `Bearer ${token}` }
+        : {};
 
       if (next) {
         const res = await fetch("/api/bookmarks", {
@@ -94,6 +101,7 @@ export function BookmarkButton({
           body: JSON.stringify({ appId }),
         });
         if (!res.ok) throw new Error("Failed to add bookmark");
+        onToggle?.(next);
       } else {
         const res = await fetch(`/api/bookmarks?appId=${appId}`, {
           method: "DELETE",
@@ -102,6 +110,7 @@ export function BookmarkButton({
           },
         });
         if (!res.ok) throw new Error("Failed to remove bookmark");
+        onToggle?.(next);
       }
     } catch (_) {
       // revert on failure

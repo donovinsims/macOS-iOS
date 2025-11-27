@@ -12,36 +12,42 @@ import { ScreenshotGallery } from "@/components/ScreenshotGallery";
 import { BookmarkButton } from "@/components/BookmarkButton";
 
 interface AppPageProps {
-  params: Promise<{
+  params: {
     slug: string;
-  }>;
+  };
 }
 
 export async function generateMetadata({ params }: AppPageProps): Promise<Metadata> {
-  const { slug } = await params;
-  const app = await db.select().from(apps).where(eq(apps.slug, slug)).limit(1);
+  const { slug } = params;
+  const [app] = await db.select().from(apps).where(eq(apps.slug, slug)).limit(1);
 
-  if (!app.length) {
+  if (!app) {
     return {
       title: "App Not Found",
     };
   }
 
   return {
-    title: `${app[0].name} - Free ${app[0].platform} App`,
-    description: app[0].shortDescription,
+    title: `${app.name} - Free ${app.platform} App`,
+    description: app.shortDescription,
   };
 }
 
 export default async function AppPage({ params }: AppPageProps) {
-  const { slug } = await params;
+  const { slug } = params;
   const result = await db.select().from(apps).where(eq(apps.slug, slug)).limit(1);
 
   if (!result.length) {
     notFound();
   }
 
-  const app = result[0];
+  const app = result[0]!;
+
+  const screenshots: string[] = Array.isArray(app.screenshots)
+    ? app.screenshots
+    : app.screenshots
+      ? JSON.parse(app.screenshots as unknown as string)
+      : [];
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black pb-20">
@@ -139,10 +145,10 @@ export default async function AppPage({ params }: AppPageProps) {
               <h2 className="text-2xl font-semibold mb-6 text-zinc-900 dark:text-white">
                 Preview
               </h2>
-              {app.screenshots && (
-                <ScreenshotGallery 
-                  screenshots={Array.isArray(app.screenshots) ? app.screenshots : JSON.parse(app.screenshots as unknown as string)} 
-                  appName={app.name} 
+              {screenshots.length > 0 && (
+                <ScreenshotGallery
+                  screenshots={screenshots}
+                  appName={app.name}
                 />
               )}
             </section>

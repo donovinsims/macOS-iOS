@@ -25,9 +25,10 @@ export interface App {
 interface AppCardProps {
   app: App;
   index: number;
+  onBookmarkChange?: () => void;
 }
 
-export function AppCard({ app, index }: AppCardProps) {
+export function AppCard({ app, index, onBookmarkChange }: AppCardProps) {
   // Use first screenshot as hero image, fallback to iconUrl
   const heroImage = app.screenshots?.[0] || app.iconUrl;
 
@@ -81,7 +82,7 @@ export function AppCard({ app, index }: AppCardProps) {
               <div className="flex items-center gap-4 flex-none">
                 {/* Prevent navigation when clicking the bookmark */}
                 <div onClick={(e) => e.preventDefault()}>
-                  <BookmarkButton appId={app.id} />
+                <BookmarkButton appId={app.id} onToggle={onBookmarkChange} />
                 </div>
                 <div className="p-0" aria-hidden>
                   <ExternalLink className="h-4 w-4 text-zinc-600 dark:text-zinc-400" />

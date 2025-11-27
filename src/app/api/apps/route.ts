@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build query conditions
-    const conditions = [];
+    const conditions = [] as Array<ReturnType<typeof like> | ReturnType<typeof eq> | ReturnType<typeof or>>;
 
     // Search condition (name, developer, or description)
     if (search) {
@@ -84,14 +84,12 @@ export async function GET(request: NextRequest) {
       conditions.push(eq(apps.category, category));
     }
 
-    // Build and execute query
-    let query = db.select().from(apps);
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-    if (conditions.length > 0) {
-      query = query.where(and(...conditions));
-    }
-
-    const results = await query
+    const results = await db
+      .select()
+      .from(apps)
+      .where(whereClause)
       .orderBy(desc(apps.createdAt))
       .limit(limit)
       .offset(offset);

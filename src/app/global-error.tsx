@@ -10,7 +10,7 @@ type GlobalErrorProps = {
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   /* ─ instrumentation shared by every route ─ */
   const lastOverlayMsg = useRef("");
-  const pollRef = useRef<NodeJS.Timeout>();
+  const pollRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const inIframe = window.parent !== window;
@@ -67,7 +67,9 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
     return () => {
       window.removeEventListener("error", onError);
       window.removeEventListener("unhandledrejection", onReject);
-      pollRef.current && clearInterval(pollRef.current);
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+      }
     };
   }, []);
 

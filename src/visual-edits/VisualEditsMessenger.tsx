@@ -1292,43 +1292,43 @@ export default function HoverReceiver() {
 
   // Update focus box position when scrolling or resizing
   useEffect(() => {
-    if (focusedElementRef.current) {
-      const handleUpdate = () => {
-        updateFocusBox();
+    if (!focusedElementRef.current) return undefined;
 
-        if (focusedElementRef.current && focusedElementId) {
-          const fr = focusedElementRef.current.getBoundingClientRect();
-          const fBox = expandBox(fr);
-          if (fBox) {
-            const focMsg: ChildToParent = {
-              type: CHANNEL,
-              msg: "FOCUS_MOVED",
-              id: focusedElementId,
-              rect: {
-                top: fBox.top,
-                left: fBox.left,
-                width: fBox.width,
-                height: fBox.height,
-              },
-            };
-            postMessageDedup(focMsg);
-          }
+    const handleUpdate = () => {
+      updateFocusBox();
+
+      if (focusedElementRef.current && focusedElementId) {
+        const fr = focusedElementRef.current.getBoundingClientRect();
+        const fBox = expandBox(fr);
+        if (fBox) {
+          const focMsg: ChildToParent = {
+            type: CHANNEL,
+            msg: "FOCUS_MOVED",
+            id: focusedElementId,
+            rect: {
+              top: fBox.top,
+              left: fBox.left,
+              width: fBox.width,
+              height: fBox.height,
+            },
+          };
+          postMessageDedup(focMsg);
         }
-      };
+      }
+    };
 
-      window.addEventListener("scroll", handleUpdate, true);
-      window.addEventListener("resize", handleUpdate);
+    window.addEventListener("scroll", handleUpdate, true);
+    window.addEventListener("resize", handleUpdate);
 
-      // Also observe the focused element for size changes
-      const resizeObserver = new ResizeObserver(handleUpdate);
-      resizeObserver.observe(focusedElementRef.current);
+    // Also observe the focused element for size changes
+    const resizeObserver = new ResizeObserver(handleUpdate);
+    resizeObserver.observe(focusedElementRef.current);
 
-      return () => {
-        window.removeEventListener("scroll", handleUpdate, true);
-        window.removeEventListener("resize", handleUpdate);
-        resizeObserver.disconnect();
-      };
-    }
+    return () => {
+      window.removeEventListener("scroll", handleUpdate, true);
+      window.removeEventListener("resize", handleUpdate);
+      resizeObserver.disconnect();
+    };
   }, [focusedElementId]);
 
   useEffect(() => {
