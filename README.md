@@ -10,16 +10,15 @@ macOS-iOS is a Next.js directory that showcases high-quality free apps for macOS
 - **Typed data layer:** Turso (libSQL) + Drizzle schema for apps, bookmarks, and Better Auth tables.
 
 ## Prerequisites
-- Node.js 18+ (or Bun) and npm.
+- Node.js 18+ and npm.
 - Turso CLI for database provisioning.
 - Git for version control.
 
 ## Setup
-1. **Install dependencies**
+1. **Install dependencies (npm only)**
+   Use npm to avoid competing lockfiles that cause merge conflicts.
    ```bash
    npm install
-   # or
-   bun install
    ```
 
 2. **Provision Turso**
