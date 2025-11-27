@@ -1,6 +1,7 @@
 {
     "name": "app",
     "version": "0.1.0",
+    "packageManager": "npm@11.4.2",
     "private": true,
     "scripts": {
         "dev": "next dev --turbopack",
