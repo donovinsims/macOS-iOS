@@ -36,8 +36,8 @@ export function AppCard({ app, index }: AppCardProps) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="group relative"
-    >
+      className="group relative">
+
       <Link href={`/apps/${app.slug}`} className="block">
         <div className="relative">
           {/* Hero Image - Only this has border */}
@@ -47,11 +47,11 @@ export function AppCard({ app, index }: AppCardProps) {
               alt={app.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            />
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
+
             
             {/* Hover Overlay with Product Information */}
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center !rounded-none">
               {/* Category Badge */}
               <div className="mb-4">
                 <span className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white">
@@ -91,6 +91,6 @@ export function AppCard({ app, index }: AppCardProps) {
           </div>
         </div>
       </Link>
-    </motion.div>
-  );
+    </motion.div>);
+
 }
