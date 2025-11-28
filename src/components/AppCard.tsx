@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
 import { BookmarkButton } from "@/components/BookmarkButton";
+import { useEffect, useMemo, useState } from "react";
 
 export interface App {
   id: number;
@@ -19,7 +20,7 @@ export interface App {
   category: string;
   rating: number;
   reviewsCount: number;
-  screenshots?: string[];
+  screenshots?: string[] | string | null;
 }
 
 interface AppCardProps {
@@ -28,8 +29,56 @@ interface AppCardProps {
 }
 
 export function AppCard({ app, index }: AppCardProps) {
-  // Use first screenshot as hero image, fallback to iconUrl
-  const heroImage = app.screenshots?.[0] || app.iconUrl;
+  const placeholderImage = "/window.svg";
+
+  const screenshots = useMemo(() => {
+    if (Array.isArray(app.screenshots)) {
+      return app.screenshots.filter(Boolean);
+    }
+
+    if (typeof app.screenshots === "string" && app.screenshots.trim().length > 0) {
+      return [app.screenshots];
+    }
+
+    return [];
+  }, [app.screenshots]);
+
+  const fallbackImages = useMemo(() => {
+    const icon = app.iconUrl?.trim();
+    const ordered = [...screenshots];
+
+    if (icon) {
+      ordered.push(icon);
+    }
+
+    ordered.push(placeholderImage);
+
+    return Array.from(new Set(ordered.filter(Boolean)));
+  }, [app.iconUrl, placeholderImage, screenshots]);
+
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+
+  useEffect(() => {
+    setHeroImageIndex(0);
+  }, [fallbackImages]);
+
+  const heroImage = fallbackImages[heroImageIndex] ?? placeholderImage;
+
+  const handleImageError = () => {
+    const nextIndex = heroImageIndex + 1;
+    const hasNextImage = nextIndex < fallbackImages.length;
+
+    console.warn("AppCard hero image failed to load", {
+      appId: app.id,
+      appSlug: app.slug,
+      attemptedUrl: heroImage,
+      nextUrl: hasNextImage ? fallbackImages[nextIndex] : placeholderImage,
+    });
+
+    if (hasNextImage) {
+      setHeroImageIndex(nextIndex);
+    }
+  };
 
   return (
     <motion.div
@@ -48,6 +97,7 @@ export function AppCard({ app, index }: AppCardProps) {
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              onError={handleImageError}
             />
             
             {/* Hover Overlay with Product Information */}
