@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { BookmarkButton } from "@/components/BookmarkButton";
 
 export interface App {
@@ -29,7 +30,35 @@ interface AppCardProps {
 
 export function AppCard({ app, index }: AppCardProps) {
   // Use first screenshot as hero image, fallback to iconUrl
-  const heroImage = app.screenshots?.[0] || app.iconUrl;
+  const blurDataURL =
+    "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNjQnIGhlaWdodD0nNDgnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zyc+PGxpbmVhckdyYWRpZW50IGlkPSdnJyB4MT0nMCUnIHkxPScwJScgeDI9JzAlJyB5Mj0nMTAwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Y2ZjZmNid2JyAvPjxzdG9wIG9mZnNldD0nMTAwJScgc3RvcC1jb2xvcj0nI2Q2ZDY2Nid2JyAvPjwvbGluZWFyR3JhZGllbnQ+PHJlY3QgeD0nMCcgeT0nMCcgd2lkdGg9JzY0JyBoZWlnaHQ9JzQ4JyBmaWxsPSd1cmwoI2cpJy8+PC9zdmc+";
+  const fallbackPlaceholder =
+    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAABb0lQxAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAHHRFWHRTb2Z0d2FyZQBQYWludC5ORVQgNC4wLjEyQ1Jnc1gAAAAVdEVYdENyZWF0aW9uIFRpbWUANDIvMTIvMjLPFYw2AAABNklEQVR4Xu2WsU4DMQyFv27MPYCMRA0QEDUx/wVguQaS5AQslLAAU4A4EtDTJTsFTJpm2c/6w4kxFz37bndu7dOrssbDUAAkAAJAAJAAJAAJAAJAAJAAJAAJIA0KkdF/wJLjZcZEmKmGdxzYw5J98vwRAtPQ0a2cXJ+K9wNI7ekW9q2CzpBcjS4JkQn5V1VklpJk0o5Gr5YLe26m/xZ6kpU+UCyrmYN0z7zhCZg3nWXFCYHdNVcUJgd017EBZmC5DW86cS2YQux9TduYLMfuvWn/ikKGYKDHJG5R4ApFGZ2Y0IJ6ZpwJaYkkKyQ0mkZ45ZW6Q3GJPuskslHlHZNkykZkspTZlEPXuzliM72Dmx1o3iH0o5o2eIQf1gLy7gQP74AEPqkNkAAkAAkAAkAAkAAkAAkAAkAAkAAkoD+wAQg2zgbCM0dLwAAAABJRU5ErkJggg==";
+  const heroImage = useMemo(
+    () => app.screenshots?.[0] || app.iconUrl || fallbackPlaceholder,
+    [app.iconUrl, app.screenshots, fallbackPlaceholder],
+  );
+
+  const [imageSrc, setImageSrc] = useState(heroImage);
+  const [isPlaceholder, setIsPlaceholder] = useState(!app.screenshots?.[0] && !app.iconUrl);
+
+  useEffect(() => {
+    setImageSrc(heroImage);
+    setIsPlaceholder(!app.screenshots?.[0] && !app.iconUrl);
+  }, [app.iconUrl, app.screenshots, heroImage]);
+
+  const useContain = isPlaceholder || imageSrc === app.iconUrl;
+
+  const handleError = () => {
+    if (imageSrc !== app.iconUrl && app.iconUrl) {
+      setImageSrc(app.iconUrl);
+      setIsPlaceholder(false);
+      return;
+    }
+
+    setImageSrc(fallbackPlaceholder);
+    setIsPlaceholder(true);
+  };
 
   return (
     <motion.div
@@ -41,15 +70,29 @@ export function AppCard({ app, index }: AppCardProps) {
       <Link href={`/apps/${app.slug}`} className="block">
         <div className="relative">
           {/* Hero Image - Only this has border */}
-          <div className="relative aspect-[4/3] overflow-hidden rounded-[14px] border border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-900">
-            <Image
-              src={heroImage}
-              alt={app.name}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            />
-            
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[14px] border border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-zinc-100 via-zinc-200 to-zinc-300 dark:from-zinc-800 dark:via-zinc-800 dark:to-zinc-900 shadow-sm">
+            <div className="absolute inset-0 p-2">
+              <Image
+                src={imageSrc}
+                alt={app.name}
+                fill
+                className={`rounded-[10px] transition-transform duration-500 group-hover:scale-105 ${useContain ? "object-contain bg-white/40 dark:bg-zinc-900/40" : "object-cover"}`}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                placeholder="blur"
+                blurDataURL={blurDataURL}
+                onError={handleError}
+              />
+              <div className="pointer-events-none absolute inset-0 rounded-[10px] bg-gradient-to-b from-black/5 via-transparent to-black/10" />
+            </div>
+
+            {isPlaceholder && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="rounded-full bg-black/70 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white shadow-sm">
+                  Image not available
+                </span>
+              </div>
+            )}
+
             {/* Hover Overlay with Product Information */}
             <div className="absolute inset-0 bg-black/60 backdrop-blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-6 text-center">
               {/* Category Badge */}
