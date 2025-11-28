@@ -31,34 +31,49 @@ interface AppCardProps {
 export function AppCard({ app, index }: AppCardProps) {
   const placeholderImage = "/window.svg";
 
-  const screenshots = useMemo(() => {
+  const fallbackImages = useMemo(() => {
+    const ordered: string[] = [];
+
+    const addIfValid = (value?: string | null) => {
+      if (typeof value !== "string") return;
+      const trimmed = value.trim();
+      if (!trimmed) return;
+      if (!ordered.includes(trimmed)) {
+        ordered.push(trimmed);
+      }
+    };
+
     if (Array.isArray(app.screenshots)) {
-      return app.screenshots.filter(Boolean);
+      app.screenshots.forEach((shot) => addIfValid(shot));
+    } else if (typeof app.screenshots === "string") {
+      addIfValid(app.screenshots);
     }
 
-    if (typeof app.screenshots === "string" && app.screenshots.trim().length > 0) {
-      return [app.screenshots];
-    }
+    addIfValid(app.iconUrl);
+    addIfValid(placeholderImage);
 
-    return [];
-  }, [app.screenshots]);
+    return ordered;
+  }, [app.iconUrl, app.screenshots]);
 
-  const initialHeroImage = screenshots[0] || app.iconUrl || placeholderImage;
-  const [heroImage, setHeroImage] = useState(initialHeroImage);
+  const [heroIndex, setHeroIndex] = useState(0);
+  const heroImage = fallbackImages[heroIndex] || placeholderImage;
 
   useEffect(() => {
-    setHeroImage(initialHeroImage);
-  }, [initialHeroImage]);
+    setHeroIndex(0);
+  }, [fallbackImages]);
 
   const handleImageError = () => {
+    const nextIndex = heroIndex + 1;
+
     console.warn("AppCard hero image failed to load", {
       appId: app.id,
       appSlug: app.slug,
       attemptedUrl: heroImage,
+      nextCandidate: fallbackImages[nextIndex],
     });
 
-    if (heroImage !== placeholderImage) {
-      setHeroImage(placeholderImage);
+    if (nextIndex < fallbackImages.length) {
+      setHeroIndex(nextIndex);
     }
   };
 

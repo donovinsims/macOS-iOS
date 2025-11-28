@@ -51,7 +51,7 @@ const apps = dataLines.map(line => {
   
   const realName = parts[1];
   const realCategory = parts[2];
-  const realScreenshotUrl = parts[parts.length - 2];
+  const realScreenshotUrl = parts[parts.length - 2]?.trim();
   const realDownloadUrl = parts[parts.length - 3];
   const realPrice = parts[parts.length - 4];
   
