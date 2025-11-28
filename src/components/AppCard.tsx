@@ -4,8 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { ExternalLink } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import { BookmarkButton } from "@/components/BookmarkButton";
+import { useEffect, useMemo, useState } from "react";
 
 export interface App {
   id: number;
@@ -20,7 +20,7 @@ export interface App {
   category: string;
   rating: number;
   reviewsCount: number;
-  screenshots?: string[];
+  screenshots?: string[] | string | null;
 }
 
 interface AppCardProps {
@@ -29,35 +29,59 @@ interface AppCardProps {
 }
 
 export function AppCard({ app, index }: AppCardProps) {
-  // Use first screenshot as hero image, fallback to iconUrl
+  const placeholderImage = "/window.svg";
   const blurDataURL =
     "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNjQnIGhlaWdodD0nNDgnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zyc+PGxpbmVhckdyYWRpZW50IGlkPSdnJyB4MT0nMCUnIHkxPScwJScgeDI9JzAlJyB5Mj0nMTAwJSc+PHN0b3Agb2Zmc2V0PScwJScgc3RvcC1jb2xvcj0nI2Y2ZjZmNid2JyAvPjxzdG9wIG9mZnNldD0nMTAwJScgc3RvcC1jb2xvcj0nI2Q2ZDY2Nid2JyAvPjwvbGluZWFyR3JhZGllbnQ+PHJlY3QgeD0nMCcgeT0nMCcgd2lkdGg9JzY0JyBoZWlnaHQ9JzQ4JyBmaWxsPSd1cmwoI2cpJy8+PC9zdmc+";
-  const fallbackPlaceholder =
-    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAYAAABb0lQxAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAHHRFWHRTb2Z0d2FyZQBQYWludC5ORVQgNC4wLjEyQ1Jnc1gAAAAVdEVYdENyZWF0aW9uIFRpbWUANDIvMTIvMjLPFYw2AAABNklEQVR4Xu2WsU4DMQyFv27MPYCMRA0QEDUx/wVguQaS5AQslLAAU4A4EtDTJTsFTJpm2c/6w4kxFz37bndu7dOrssbDUAAkAAJAAJAAJAAJAAJAAJAAJAAJIA0KkdF/wJLjZcZEmKmGdxzYw5J98vwRAtPQ0a2cXJ+K9wNI7ekW9q2CzpBcjS4JkQn5V1VklpJk0o5Gr5YLe26m/xZ6kpU+UCyrmYN0z7zhCZg3nWXFCYHdNVcUJgd017EBZmC5DW86cS2YQux9TduYLMfuvWn/ikKGYKDHJG5R4ApFGZ2Y0IJ6ZpwJaYkkKyQ0mkZ45ZW6Q3GJPuskslHlHZNkykZkspTZlEPXuzliM72Dmx1o3iH0o5o2eIQf1gLy7gQP74AEPqkNkAAkAAkAAkAAkAAkAAkAAkAAkAAkoD+wAQg2zgbCM0dLwAAAABJRU5ErkJggg==";
-  const heroImage = useMemo(
-    () => app.screenshots?.[0] || app.iconUrl || fallbackPlaceholder,
-    [app.iconUrl, app.screenshots, fallbackPlaceholder],
-  );
 
-  const [imageSrc, setImageSrc] = useState(heroImage);
-  const [isPlaceholder, setIsPlaceholder] = useState(!app.screenshots?.[0] && !app.iconUrl);
-
-  useEffect(() => {
-    setImageSrc(heroImage);
-    setIsPlaceholder(!app.screenshots?.[0] && !app.iconUrl);
-  }, [app.iconUrl, app.screenshots, heroImage]);
-
-  const useContain = isPlaceholder || imageSrc === app.iconUrl;
-
-  const handleError = () => {
-    if (imageSrc !== app.iconUrl && app.iconUrl) {
-      setImageSrc(app.iconUrl);
-      setIsPlaceholder(false);
-      return;
+  const screenshots = useMemo(() => {
+    if (Array.isArray(app.screenshots)) {
+      return app.screenshots.filter(Boolean);
     }
 
-    setImageSrc(fallbackPlaceholder);
-    setIsPlaceholder(true);
+    if (typeof app.screenshots === "string" && app.screenshots.trim().length > 0) {
+      return [app.screenshots];
+    }
+
+    return [];
+  }, [app.screenshots]);
+
+  const fallbackImages = useMemo(() => {
+    const icon = app.iconUrl?.trim();
+    const ordered = [...screenshots];
+
+    if (icon) {
+      ordered.push(icon);
+    }
+
+    ordered.push(placeholderImage);
+
+    return Array.from(new Set(ordered.filter(Boolean)));
+  }, [app.iconUrl, placeholderImage, screenshots]);
+
+  const [heroImageIndex, setHeroImageIndex] = useState(0);
+
+  useEffect(() => {
+    setHeroImageIndex(0);
+  }, [fallbackImages]);
+
+  const heroImage = fallbackImages[heroImageIndex] ?? placeholderImage;
+  const isPlaceholder = heroImage === placeholderImage;
+  const useContain = isPlaceholder || heroImage === app.iconUrl;
+
+  const handleImageError = () => {
+    const nextIndex = heroImageIndex + 1;
+    const hasNextImage = nextIndex < fallbackImages.length;
+
+    console.warn("AppCard hero image failed to load", {
+      appId: app.id,
+      appSlug: app.slug,
+      attemptedUrl: heroImage,
+      nextUrl: hasNextImage ? fallbackImages[nextIndex] : placeholderImage,
+    });
+
+    if (hasNextImage) {
+      setHeroImageIndex(nextIndex);
+    }
   };
 
   return (
@@ -73,14 +97,14 @@ export function AppCard({ app, index }: AppCardProps) {
           <div className="relative aspect-[4/3] overflow-hidden rounded-[14px] border border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-zinc-100 via-zinc-200 to-zinc-300 dark:from-zinc-800 dark:via-zinc-800 dark:to-zinc-900 shadow-sm">
             <div className="absolute inset-0 p-2">
               <Image
-                src={imageSrc}
+                src={heroImage}
                 alt={app.name}
                 fill
                 className={`rounded-[10px] transition-transform duration-500 group-hover:scale-105 ${useContain ? "object-contain bg-white/40 dark:bg-zinc-900/40" : "object-cover"}`}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 placeholder="blur"
                 blurDataURL={blurDataURL}
-                onError={handleError}
+                onError={handleImageError}
               />
               <div className="pointer-events-none absolute inset-0 rounded-[10px] bg-gradient-to-b from-black/5 via-transparent to-black/10" />
             </div>
