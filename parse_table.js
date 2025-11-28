@@ -69,7 +69,7 @@ const apps = dataLines.map(line => {
     description: realDescription,
     price: realPrice,
     downloadUrl: realDownloadUrl,
-    screenshotUrl: realScreenshotUrl
+    screenshots: realScreenshotUrl ? [realScreenshotUrl] : [],
   };
 });
 
