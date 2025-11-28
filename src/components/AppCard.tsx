@@ -125,7 +125,7 @@ export function AppCard({ app, index }: AppCardProps) {
                   {app.category}
                 </span>
               </div>
-
+              
               {/* App Description */}
               <p className="text-white text-base font-medium leading-relaxed max-w-[90%]">
                 {app.shortDescription}

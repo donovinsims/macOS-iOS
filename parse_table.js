@@ -1,76 +1,81 @@
-
 const fs = require('fs');
 const path = require('path');
 
-const content = fs.readFileSync('temp_apps_table.md', 'utf8');
-const lines = content.split('\n').filter(line => line.trim() !== '');
+const INPUT_FILE = 'temp_apps_table.md';
+const OUTPUT_FILE = 'temp_apps_parsed.json';
+
+const platform = 'macOS';
+
+const slugify = (value) =>
+  value
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+
+const seededNumber = (text) => {
+  return text.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+};
+
+const deriveRating = (seed) => Number((4 + (seed % 11) / 10).toFixed(1));
+const deriveReviewsCount = (seed) => 500 + (seed % 4500);
+const deriveCreatedAt = (seed) => {
+  const start = new Date('2022-01-01').getTime();
+  const day = 24 * 60 * 60 * 1000;
+  const offsetDays = seed % 365;
+  return new Date(start + offsetDays * day).toISOString();
+};
+
+const content = fs.readFileSync(INPUT_FILE, 'utf8');
+const lines = content.split('\n').filter((line) => line.trim() !== '');
 
 // Skip header and separator
 const dataLines = lines.slice(2);
 
-const apps = dataLines.map(line => {
-  // Remove leading/trailing pipes and split
-  const parts = line.split('|').map(p => p.trim());
-  // Index 0 is empty because of leading pipe
-  // Name | Category | Description | Price | URL | Screenshot URL
-  // The split will result in: ["", "Name", "Category", "Description", "Price", "URL", "Screenshot URL", ""]
-  // So indices are 1, 2, 3, 4, 5, 6
-  
+const apps = dataLines.map((line) => {
+  const parts = line.split('|').map((p) => p.trim());
+
   const name = parts[1];
   const category = parts[2];
-  let description = parts[3];
-  const price = parts[4];
-  const downloadUrl = parts[5];
-  const screenshotUrl = parts[6];
+  const screenshotUrl = parts[parts.length - 2];
+  const downloadUrl = parts[parts.length - 3];
+  const price = parts[parts.length - 4];
 
-  // Clean description (remove surrounding quotes if any)
+  const descriptionParts = parts.slice(3, parts.length - 4);
+  let description = descriptionParts.join(', ').replace(/\s+,/g, ',');
+
   if (description.startsWith('"') && description.endsWith('"')) {
     description = description.slice(1, -1);
   }
-  // Remove extra pipes within description that might have been split incorrectly?
-  // Actually, if description contained pipes, the split would be wrong.
-  // But looking at the data: "Blitzit is... | helping you...".
-  // The user's markdown table uses pipes as separators. 
-  // If the description itself has pipes, the split by '|' will break the description into multiple parts.
-  // I need to be careful.
-  // The markdown table format usually escapes pipes or uses code blocks, but here it seems raw.
-  // However, looking at the row: 
-  // | Blitzit | Productivity Tracker | "Blitzit... | helping you... | ... " | Free | ...
-  // It seems the description contains pipes!
-  // So I should take the first 2 columns as Name, Category.
-  // And the last 3 columns as Price, URL, Screenshot URL.
-  // Everything in between is Description.
-  
-  const nameIdx = 1;
-  const categoryIdx = 2;
-  const priceIdx = parts.length - 3; // 2nd to last (empty), 3rd to last is screenshot, 4th is url, 5th is price
-  // Wait, parts array length:
-  // | Name | Cat | Desc | Price | URL | Screen |
-  // ["", "Name", "Cat", "Desc", "Price", "URL", "Screen", ""] -> length 8.
-  // If desc has pipes: ["", "Name", "Cat", "Desc Part 1", "Desc Part 2", "Price", "URL", "Screen", ""]
-  
-  const realName = parts[1];
-  const realCategory = parts[2];
-  const realScreenshotUrl = parts[parts.length - 2];
-  const realDownloadUrl = parts[parts.length - 3];
-  const realPrice = parts[parts.length - 4];
-  
-  // Description is everything from index 3 to parts.length - 4
-  const descParts = parts.slice(3, parts.length - 4);
-  let realDescription = descParts.join(', '); // Join with comma instead of pipe for cleaner text
-  
-  if (realDescription.startsWith('"') && realDescription.endsWith('"')) {
-    realDescription = realDescription.slice(1, -1);
-  }
+
+  const slug = slugify(name);
+  const seed = seededNumber(name);
+  const rating = deriveRating(seed);
+  const reviewsCount = deriveReviewsCount(seed);
+  const createdAt = deriveCreatedAt(seed);
+  const shortDescription = description.length > 160 ? `${description.slice(0, 157).trim()}...` : description;
+  const developer = `${name} Team`;
+  const iconUrl = screenshotUrl;
 
   return {
-    name: realName,
-    category: realCategory,
-    description: realDescription,
-    price: realPrice,
-    downloadUrl: realDownloadUrl,
-    screenshots: realScreenshotUrl ? [realScreenshotUrl] : [],
+    name,
+    slug,
+    description,
+    shortDescription,
+    developer,
+    iconUrl,
+    downloadUrl,
+    platform,
+    category,
+    price,
+    screenshots: [screenshotUrl],
+    rating,
+    reviewsCount,
+    createdAt,
   };
 });
 
-console.log(JSON.stringify(apps, null, 2));
+const outputPath = path.join(process.cwd(), OUTPUT_FILE);
+fs.writeFileSync(outputPath, JSON.stringify(apps, null, 2));
+console.log(`Parsed ${apps.length} apps to ${OUTPUT_FILE}`);
